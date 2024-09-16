@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { Search } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -8,7 +8,8 @@ import { LegalDocument } from "./legal-document";
 import { Case } from "@/types/cases";
 import { Filters } from "@/types/cases";
 
-export const Results = () => {
+// Create a separate component for the search functionality
+const SearchResults = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
@@ -140,5 +141,14 @@ export const Results = () => {
         </div>
       </main>
     </div>
+  );
+};
+
+// Wrap the SearchResults component with Suspense in the main Results component
+export const Results = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SearchResults />
+    </Suspense>
   );
 };
