@@ -19,7 +19,7 @@ const FilterOptions: React.FC<FilterOptionsProps> = ({ onFilterChange }) => {
     [],
   );
   const [selectedCourts, setSelectedCourts] = useState<string[]>([]);
-  const [yearRange, setYearRange] = useState<[number, number]>([1961, 2024]);
+  const [yearRange, setYearRange] = useState<[number, number]>([2023, 2024]);
 
   const handleJurisdictionChange = (jurisdiction: string) => {
     setSelectedJurisdictions((prev) => {

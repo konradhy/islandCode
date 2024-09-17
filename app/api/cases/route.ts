@@ -14,12 +14,37 @@ export async function POST(request: Request) {
   const limit = 10;
   const offset = (page - 1) * limit;
 
-  let query = "SELECT * FROM cases WHERE 1=1";
-  const queryParams: (string | number | string[])[] = [];
+  let query = `
+    SELECT *,
+    CASE
+      WHEN caseTitle LIKE ? OR caseNumber LIKE ? THEN 3
+      WHEN keywordsSummary LIKE ? THEN 2
+      WHEN MATCH(searchableText) AGAINST (? IN BOOLEAN MODE) THEN 1
+      ELSE 0
+    END AS priority
+    FROM cases
+    WHERE 1=1
+  `;
+  const queryParams: (string | number | string[])[] = [
+    `%${searchTerm}%`,
+    `%${searchTerm}%`,
+    `%${searchTerm}%`,
+    searchTerm,
+  ];
 
   if (searchTerm) {
-    query += " AND (caseTitle LIKE ? OR caseNumber LIKE ?)";
-    queryParams.push(`%${searchTerm}%`, `%${searchTerm}%`);
+    query += ` AND (
+      caseTitle LIKE ? OR
+      caseNumber LIKE ? OR
+      keywordsSummary LIKE ? OR
+      MATCH(searchableText) AGAINST (? IN BOOLEAN MODE)
+    )`;
+    queryParams.push(
+      `%${searchTerm}%`,
+      `%${searchTerm}%`,
+      `%${searchTerm}%`,
+      searchTerm,
+    );
   }
 
   if (filters.jurisdictions && filters.jurisdictions.length > 0) {
@@ -37,7 +62,7 @@ export async function POST(request: Request) {
     queryParams.push(filters.yearRange[0], filters.yearRange[1]);
   }
 
-  query += " ORDER BY dateOfDelivery DESC LIMIT ? OFFSET ?";
+  query += " ORDER BY priority DESC, dateOfDelivery DESC LIMIT ? OFFSET ?";
   queryParams.push(limit, offset);
 
   try {

@@ -15,7 +15,7 @@ const SearchResults = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<Filters>({
     jurisdictions: [],
-    yearRange: [1961, 2024],
+    yearRange: [2023, 2024],
     courts: [],
   });
   const [results, setResults] = useState<Case[]>([]); // Explicitly type and initialize as an empty array
