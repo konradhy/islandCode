@@ -72,6 +72,32 @@ export function mergeResults(
           }),
         ) ?? [],
     },
+    legislation: {
+      legislations:
+        intermediateResult.legislation?.legislations?.map((legislation) => ({
+          name: legislation.name ?? "",
+          sections_mentioned: legislation.sections_mentioned ?? [],
+          relation_to_case: legislation.relation_to_case ?? "",
+          key_snippets: legislation.key_snippets ?? [],
+          explanation: legislation.explanation ?? "",
+          relevance: legislation.relevance ?? "",
+        })) ?? [],
+    },
+    key_persons: {
+      persons:
+        intermediateResult.key_persons?.persons?.map((person) => ({
+          name: person.name ?? "",
+          role: person.role ?? "",
+          relationships:
+            person.relationships?.map((rel) => ({
+              related_to: rel.related_to ?? "",
+              relationship: rel.relationship ?? "",
+            })) ?? [],
+          significant_actions_or_statements:
+            person.significant_actions_or_statements ?? [],
+        })) ?? [],
+    },
     final_summary: intermediateResult.final_summary ?? "",
+    confidence: intermediateResult.confidence ?? false,
   };
 }

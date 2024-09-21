@@ -3,16 +3,15 @@ import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 
 export const getCaseById = query({
-  args: { id: v.id('cases') },
+  args: { id: v.id("cases") },
   handler: async (ctx, args) => {
     const caseDoc = await ctx.db.get(args.id);
     if (!caseDoc) {
-      throw new Error('Case not found');
+      throw new Error("Case not found");
     }
 
+    const pdfUrl = await ctx.storage.getUrl(caseDoc.storageId);
 
-   const pdfUrl = await ctx.storage.getUrl(caseDoc.storageId);
-    
     return {
       ...caseDoc,
       pdfUrl,
@@ -35,7 +34,6 @@ export const saveCase = mutation({
     jurisdiction: v.string(),
     court: v.string(),
     searchableText: v.string(),
-
   },
   handler: async (ctx, args) => {
     const searchSummary = `${args.caseTitle} ${args.keywordsSummary}`;
@@ -48,16 +46,17 @@ export const getCases = query({
     searchTerm: v.optional(v.string()),
     jurisdiction: v.optional(v.string()),
     paginationOpts: paginationOptsValidator,
-    filters: v.optional(v.object({
-      jurisdictions: v.array(v.string()),
-      yearRange: v.array(v.number()),
-      courts: v.array(v.string()),
-    })),
+    filters: v.optional(
+      v.object({
+        jurisdictions: v.array(v.string()),
+        yearRange: v.array(v.number()),
+        courts: v.array(v.string()),
+      }),
+    ),
   },
   handler: async (ctx, args) => {
     const { searchTerm, jurisdiction, paginationOpts } = args;
 
-    console.log(args.filters);
     let paginatedResults;
 
     if (searchTerm && searchTerm.trim() !== "") {
@@ -75,9 +74,11 @@ export const getCases = query({
     } else {
       // Return latest cases when there's no search term
       let query = ctx.db.query("cases").order("desc");
-      
+
       if (jurisdiction) {
-        query = query.filter(q => q.eq(q.field("jurisdiction"), jurisdiction));
+        query = query.filter((q) =>
+          q.eq(q.field("jurisdiction"), jurisdiction),
+        );
       }
 
       paginatedResults = await query.paginate(paginationOpts);
@@ -85,30 +86,26 @@ export const getCases = query({
 
     return {
       ...paginatedResults,
-      page: paginatedResults.page.map(caseItem => ({
+      page: paginatedResults.page.map((caseItem) => ({
         id: caseItem._id,
         title: caseItem.caseTitle,
         citation: caseItem.neutralCitation,
         jurisdiction: caseItem.jurisdiction,
         docType: "Case",
         snippet: caseItem.keywordsSummary,
-      }))
+      })),
     };
   },
 });
 
-
-
-
 export const generateUploadUrl = mutation(async (ctx) => {
-  console.log('Generating upload URL');
   return await ctx.storage.generateUploadUrl();
 });
 
 export const uploadPdf = action({
   args: { pdfData: v.string(), fileName: v.string() },
   handler: async (ctx, args) => {
-    const buffer = Buffer.from(args.pdfData, 'base64');
+    const buffer = Buffer.from(args.pdfData, "base64");
     const blob = new Blob([buffer]);
     const storageId = await ctx.storage.store(blob);
     return { storageId };

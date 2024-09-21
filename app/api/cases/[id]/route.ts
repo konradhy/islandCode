@@ -14,7 +14,6 @@ export async function GET(
   { params }: { params: { id: string } },
 ) {
   const id = params.id;
-  console.log("id", id);
 
   try {
     const [rows] = await pool.query("SELECT * FROM cases WHERE id = ?", [id]);

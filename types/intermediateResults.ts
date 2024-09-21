@@ -1,5 +1,6 @@
 // types/intermediateResults.ts
 
+//delete this? You still use it in mergeResults.ts
 export interface IntermediateMetadata {
   case_name?: string;
   citation?: string;
@@ -55,6 +56,29 @@ export interface IntermediateSentencesAndAwards {
   }>;
 }
 
+export interface IntermediateLegislationAnalysis {
+  legislations?: Array<{
+    name?: string;
+    sections_mentioned?: string[];
+    relation_to_case?: string;
+    key_snippets?: string[];
+    explanation?: string;
+    relevance?: string;
+  }>;
+}
+
+export interface IntermediateKeyPersons {
+  persons?: Array<{
+    name?: string;
+    role?: string;
+    relationships?: Array<{
+      related_to?: string;
+      relationship?: string;
+    }>;
+    significant_actions_or_statements?: string[];
+  }>;
+}
+
 export interface IntermediateAnalysisResult {
   metadata?: IntermediateMetadata;
   factual_background?: IntermediateFactualBackground;
@@ -62,5 +86,8 @@ export interface IntermediateAnalysisResult {
   decision_and_precedents?: IntermediateDecisionAndPrecedents;
   implications_and_context?: IntermediateImplicationsAndContext;
   sentences_and_awards?: IntermediateSentencesAndAwards;
+  legislation?: IntermediateLegislationAnalysis;
+  key_persons?: IntermediateKeyPersons;
   final_summary?: string;
+  confidence?: boolean;
 }

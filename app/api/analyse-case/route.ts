@@ -1,7 +1,7 @@
 // app/api/analyse-case/route.ts
 
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
+
 import { zodResponseFormat } from "openai/helpers/zod";
 import {
   CaseAnalysisSchema,
@@ -13,6 +13,8 @@ import {
   SentencesAndAwardsSchema,
   CaseAnalysis,
   FinalSummarySchema,
+  KeyPersonSchema,
+  LegislationAnalysisSchema,
 } from "@/types/caseAnalysis";
 import { z } from "zod";
 import { mergeResults } from "@/lib/mergeResults";
@@ -24,11 +26,12 @@ import {
   implicationsAndContextPrompt,
   sentencesAndAwardsPrompt,
   getFinalSummaryPrompt,
+  keyPersonsPrompt,
+  LegislationPrompt,
 } from "@/lib/prompts/caseAnalysisPrompts";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import { openai } from "@/lib/openaiConfig";
+import { analyzeMetadata } from "@/lib/caseAnalysis/metadataAnalysis";
 
 async function analyzeSection<T extends z.ZodType>(
   text: string,
@@ -46,65 +49,94 @@ async function analyzeSection<T extends z.ZodType>(
   });
   console.log("This generation came from the propmt: ", prompt);
 
+  if (prompt === LegislationPrompt) {
+    console.log("Legislation completion:", completion);
+  }
   return completion.choices[0].message.parsed;
 }
 
+//nnext step is to do something with the confidence. I think the best thing is to just the text of the confidence in brackets if iis low or medium, and that would be done right in the metadatanalysis function
+// then i should update the structure to store whether or not something was flagged and why.
+// then i should rinse and repeate for each section
+//then build a way to save the information into the database. The original and the refined data. We can save the final data at the very end, but make repeated save calls, for the various parts
+//Then build a way to display the information attractively on the front end
+
+//So for Now. If the confidence is low for anything
 export async function POST(request: Request) {
   try {
     const { text } = await request.json();
 
-    const intermediateResult: Partial<CaseAnalysis> = {};
+    // Analyze metadata using the new multi-pass approach
+    const metadataAnalysis = await analyzeMetadata(text);
 
-    // You can improve the prompts by also providing intermediate results or parts of it to the next prompt
-    // In the future This might be particularly useful when trying to show the application of law.
-    intermediateResult.metadata = await analyzeSection(
-      text,
-      metadataPrompt,
-      MetadataSchema,
-    );
+    // Initialize the analysis object with the metadata
+    const analysis: Partial<CaseAnalysis> = {
+      metadata: metadataAnalysis.metadata,
+    };
 
-    intermediateResult.factual_background = await analyzeSection(
+    if (metadataAnalysis.hasLowConfidence) {
+      analysis.confidence = true;
+    }
+
+    // Analyze other sections
+    analysis.factual_background = await analyzeSection(
       text,
       factualBackgroundPrompt,
       FactualBackgroundSchema,
     );
 
-    intermediateResult.arguments_and_reasoning = await analyzeSection(
+    analysis.arguments_and_reasoning = await analyzeSection(
       text,
       argumentsAndReasoningPrompt,
       ArgumentsAndReasoningSchema,
     );
 
-    intermediateResult.decision_and_precedents = await analyzeSection(
+    analysis.decision_and_precedents = await analyzeSection(
       text,
       decisionAndPrecedentsPrompt,
       DecisionAndPrecedentsSchema,
     );
 
-    intermediateResult.implications_and_context = await analyzeSection(
+    analysis.implications_and_context = await analyzeSection(
       text,
       implicationsAndContextPrompt,
       ImplicationsAndContextSchema,
     );
 
-    intermediateResult.sentences_and_awards = await analyzeSection(
+    analysis.sentences_and_awards = await analyzeSection(
       text,
       sentencesAndAwardsPrompt,
       SentencesAndAwardsSchema,
     );
 
+    analysis.key_persons = await analyzeSection(
+      text,
+      keyPersonsPrompt,
+      KeyPersonSchema,
+    );
+
+    analysis.legislation = await analyzeSection(
+      text,
+      LegislationPrompt,
+      LegislationAnalysisSchema,
+    );
+
     // Generate final summary
     const finalSummaryResult = await analyzeSection(
-      JSON.stringify(intermediateResult),
-      getFinalSummaryPrompt(intermediateResult),
+      JSON.stringify(analysis),
+      getFinalSummaryPrompt(analysis),
       FinalSummarySchema,
     );
 
-    intermediateResult.final_summary = finalSummaryResult.summary;
+    analysis.final_summary = finalSummaryResult.summary;
 
-    const finalAnalysis = mergeResults(intermediateResult);
+    // TODO: is merge result still need?
+    const finalAnalysis = mergeResults(analysis);
 
-    return NextResponse.json({ analysis: finalAnalysis });
+    return NextResponse.json({
+      analysis: finalAnalysis,
+      metadataConfidence: metadataAnalysis.confidence,
+    });
   } catch (error) {
     console.error("Error analyzing case:", error);
     return NextResponse.json(

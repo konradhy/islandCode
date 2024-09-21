@@ -12,7 +12,6 @@ const CaseDetails = () => {
   const id = params.id as string;
   const [caseDetails, setCaseDetails] = useState<Case | null>(null);
   const [showPDF, setShowPDF] = useState(true);
-  console.log("pdfUrl", caseDetails?.pdfUrl);
 
   useEffect(() => {
     if (id) {

@@ -11,6 +11,35 @@ export const MetadataSchema = z.object({
   procedural_history: z.array(z.string()),
 });
 
+export const LegislationAnalysisSchema = z.object({
+  legislations: z.array(
+    z.object({
+      name: z.string(),
+      sections_mentioned: z.array(z.string()),
+      relation_to_case: z.string(),
+      key_snippets: z.array(z.string()),
+      explanation: z.string(),
+      relevance: z.string(),
+    }),
+  ),
+});
+
+export const KeyPersonSchema = z.object({
+  persons: z.array(
+    z.object({
+      name: z.string(),
+      role: z.string(),
+      relationships: z.array(
+        z.object({
+          related_to: z.string(),
+          relationship: z.string(),
+        }),
+      ),
+      significant_actions_or_statements: z.array(z.string()),
+    }),
+  ),
+});
+
 export const FinalSummarySchema = z.object({
   summary: z.string(),
 });
@@ -75,6 +104,9 @@ export const CaseAnalysisSchema = z.object({
   implications_and_context: ImplicationsAndContextSchema,
   sentences_and_awards: SentencesAndAwardsSchema,
   final_summary: z.string(),
+  key_persons: KeyPersonSchema,
+  legislation: LegislationAnalysisSchema,
+  confidence: z.boolean(),
 });
 
 export type CaseAnalysis = z.infer<typeof CaseAnalysisSchema>;

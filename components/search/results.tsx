@@ -29,10 +29,6 @@ const SearchResults = () => {
     fetchCases(initialSearchTerm, filters, 1);
   }, [searchParams, filters]);
 
-  useEffect(() => {
-    console.log("Updated results:", results);
-  }, [results]);
-
   const fetchCases = async (
     search: string,
     filters: Filters,
@@ -46,7 +42,7 @@ const SearchResults = () => {
         body: JSON.stringify({ searchTerm: search, filters, page: pageNum }),
       });
       const data = await response.json();
-      console.log("Received data:", data); // Add this line
+
       if (pageNum === 1) {
         setResults(data.cases);
       } else {
