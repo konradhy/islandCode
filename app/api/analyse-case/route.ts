@@ -4,9 +4,6 @@ import { NextResponse } from "next/server";
 
 import { zodResponseFormat } from "openai/helpers/zod";
 import {
-  CaseAnalysisSchema,
-  MetadataSchema,
-  FactualBackgroundSchema,
   ArgumentsAndReasoningSchema,
   DecisionAndPrecedentsSchema,
   ImplicationsAndContextSchema,
@@ -19,9 +16,6 @@ import {
 import { z } from "zod";
 import { mergeResults } from "@/lib/mergeResults";
 import {
-  metadataPrompt,
-  factualBackgroundPrompt,
-  argumentsAndReasoningPrompt,
   decisionAndPrecedentsPrompt,
   implicationsAndContextPrompt,
   sentencesAndAwardsPrompt,
@@ -32,14 +26,17 @@ import {
 
 import { openai } from "@/lib/openaiConfig";
 import { analyzeMetadata } from "@/lib/caseAnalysis/metadataAnalysis";
+import { analyzeFactualBackground } from "@/lib/caseAnalysis/factualBackgroundAnalysis";
+import { analyzeArgumentsAndReasoning } from "@/lib/caseAnalysis/argumentsAndReasoningAnalysis";
+import { analyzeDecisionsAndPrecedents } from "@/lib/caseAnalysis/decisionsAndPrecedentsAnalysis";
 
-async function analyzeSection<T extends z.ZodType>(
+export async function analyzeSection<T extends z.ZodType>(
   text: string,
   prompt: string,
   schema: T,
 ): Promise<z.infer<T>> {
   const completion = await openai.beta.chat.completions.parse({
-    model: "gpt-4o-2024-08-06",
+    model: "gpt-4o-mini",
     messages: [
       { role: "system", content: prompt },
       { role: "user", content: text },
@@ -47,19 +44,9 @@ async function analyzeSection<T extends z.ZodType>(
     temperature: 0.7,
     response_format: zodResponseFormat(schema, "section_analysis"),
   });
-  console.log("This generation came from the propmt: ", prompt);
 
-  if (prompt === LegislationPrompt) {
-    console.log("Legislation completion:", completion);
-  }
   return completion.choices[0].message.parsed;
 }
-
-//nnext step is to do something with the confidence. I think the best thing is to just the text of the confidence in brackets if iis low or medium, and that would be done right in the metadatanalysis function
-// then i should update the structure to store whether or not something was flagged and why.
-// then i should rinse and repeate for each section
-//then build a way to save the information into the database. The original and the refined data. We can save the final data at the very end, but make repeated save calls, for the various parts
-//Then build a way to display the information attractively on the front end
 
 //So for Now. If the confidence is low for anything
 export async function POST(request: Request) {
@@ -68,34 +55,30 @@ export async function POST(request: Request) {
 
     // Analyze metadata using the new multi-pass approach
     const metadataAnalysis = await analyzeMetadata(text);
+    const factualBackgroundAnalysis = await analyzeFactualBackground(text);
+    const argumentsAndReasoningAnalysis =
+      await analyzeArgumentsAndReasoning(text);
+    const decisionsAndPrecedentsAnalysis =
+      await analyzeDecisionsAndPrecedents(text);
 
-    // Initialize the analysis object with the metadata
     const analysis: Partial<CaseAnalysis> = {
       metadata: metadataAnalysis.metadata,
+      factual_background: factualBackgroundAnalysis.factualBackground,
+      arguments_and_reasoning:
+        argumentsAndReasoningAnalysis.argumentsAndReasoning,
+      decision_and_precedents:
+        decisionsAndPrecedentsAnalysis.decisionsAndPrecedents,
     };
 
-    if (metadataAnalysis.hasLowConfidence) {
+    if (
+      metadataAnalysis.hasLowConfidence ||
+      factualBackgroundAnalysis.hasLowConfidence ||
+      argumentsAndReasoningAnalysis.hasLowConfidence ||
+      decisionsAndPrecedentsAnalysis.hasLowConfidence
+    ) {
       analysis.confidence = true;
     }
-
     // Analyze other sections
-    analysis.factual_background = await analyzeSection(
-      text,
-      factualBackgroundPrompt,
-      FactualBackgroundSchema,
-    );
-
-    analysis.arguments_and_reasoning = await analyzeSection(
-      text,
-      argumentsAndReasoningPrompt,
-      ArgumentsAndReasoningSchema,
-    );
-
-    analysis.decision_and_precedents = await analyzeSection(
-      text,
-      decisionAndPrecedentsPrompt,
-      DecisionAndPrecedentsSchema,
-    );
 
     analysis.implications_and_context = await analyzeSection(
       text,
@@ -135,7 +118,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       analysis: finalAnalysis,
-      metadataConfidence: metadataAnalysis.confidence,
+      // metadataConfidence: metadataAnalysis.confidence,
     });
   } catch (error) {
     console.error("Error analyzing case:", error);
@@ -145,15 +128,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
-/*
-Next steps:
-1. 
-2. Improve the quality of the prompts
-3. 
-4. Create multipass for the individual sections to refine
-5. Build a way to save and compare the different results 
-
-
-
-*/

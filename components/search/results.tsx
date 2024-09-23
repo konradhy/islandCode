@@ -18,7 +18,7 @@ const SearchResults = () => {
     yearRange: [2023, 2024],
     courts: [],
   });
-  const [results, setResults] = useState<Case[]>([]); // Explicitly type and initialize as an empty array
+  const [results, setResults] = useState<Case[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
