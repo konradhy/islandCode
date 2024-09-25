@@ -17,20 +17,12 @@ export async function analyzeDecisionsAndPrecedents(text: string): Promise<{
     decisionsAndPrecedentsPrompts.initialExtraction,
     DecisionAndPrecedentsSchema,
   );
-  console.log(
-    "Initial decisions and precedents:",
-    initialDecisionsAndPrecedents,
-  );
 
   // Verification and refinement
   const refinedDecisionsAndPrecedents = await analyzeSection(
     JSON.stringify({ initialDecisionsAndPrecedents, originalText: text }),
     decisionsAndPrecedentsPrompts.verificationAndRefinement,
     DecisionAndPrecedentsSchema,
-  );
-  console.log(
-    "Refined decisions and precedents:",
-    refinedDecisionsAndPrecedents,
   );
 
   // Confidence assessment
@@ -39,8 +31,6 @@ export async function analyzeDecisionsAndPrecedents(text: string): Promise<{
     decisionsAndPrecedentsPrompts.confidenceAssessment,
     DecisionAndPrecedentsConfidenceSchema,
   );
-
-  console.log("Confidence assessment:", confidenceAssessment);
 
   const hasLowConfidence = Object.values(confidenceAssessment).some((field) => {
     if (typeof field === "object" && field !== null) {

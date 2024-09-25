@@ -62,6 +62,9 @@ export const DecisionAndPrecedentsSchema = z.object({
     z.object({
       case_name: z.string(),
       relevance: z.string(),
+      quote: z.string(),
+      principle: z.string(),
+      context: z.string(),
     }),
   ),
 });

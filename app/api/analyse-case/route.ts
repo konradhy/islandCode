@@ -29,6 +29,9 @@ import { analyzeMetadata } from "@/lib/caseAnalysis/metadataAnalysis";
 import { analyzeFactualBackground } from "@/lib/caseAnalysis/factualBackgroundAnalysis";
 import { analyzeArgumentsAndReasoning } from "@/lib/caseAnalysis/argumentsAndReasoningAnalysis";
 import { analyzeDecisionsAndPrecedents } from "@/lib/caseAnalysis/decisionsAndPrecedentsAnalysis";
+import { analyzeImplicationsAndContext } from "@/lib/caseAnalysis/implicationsAndContextAnalysis";
+import { analyzeSentencesAndAwards } from "@/lib/caseAnalysis/sentencesAndAwardsAnalysis";
+import { analyzeLegislation } from "@/lib/caseAnalysis/legislationAnalysis";
 
 export async function analyzeSection<T extends z.ZodType>(
   text: string,
@@ -60,6 +63,10 @@ export async function POST(request: Request) {
       await analyzeArgumentsAndReasoning(text);
     const decisionsAndPrecedentsAnalysis =
       await analyzeDecisionsAndPrecedents(text);
+    const implicationsAndContextAnalysis =
+      await analyzeImplicationsAndContext(text);
+    const sentencesAndAwardsAnalysis = await analyzeSentencesAndAwards(text);
+    const legislationAnalysis = await analyzeLegislation(text);
 
     const analysis: Partial<CaseAnalysis> = {
       metadata: metadataAnalysis.metadata,
@@ -68,40 +75,29 @@ export async function POST(request: Request) {
         argumentsAndReasoningAnalysis.argumentsAndReasoning,
       decision_and_precedents:
         decisionsAndPrecedentsAnalysis.decisionsAndPrecedents,
+      implications_and_context:
+        implicationsAndContextAnalysis.implicationsAndContext,
+      sentences_and_awards: sentencesAndAwardsAnalysis.sentencesAndAwards,
+      legislation: legislationAnalysis.legislationAnalysis,
     };
 
     if (
       metadataAnalysis.hasLowConfidence ||
       factualBackgroundAnalysis.hasLowConfidence ||
       argumentsAndReasoningAnalysis.hasLowConfidence ||
-      decisionsAndPrecedentsAnalysis.hasLowConfidence
+      decisionsAndPrecedentsAnalysis.hasLowConfidence ||
+      implicationsAndContextAnalysis.hasLowConfidence ||
+      sentencesAndAwardsAnalysis.hasLowConfidence ||
+      legislationAnalysis.hasLowConfidence
     ) {
       analysis.confidence = true;
     }
     // Analyze other sections
 
-    analysis.implications_and_context = await analyzeSection(
-      text,
-      implicationsAndContextPrompt,
-      ImplicationsAndContextSchema,
-    );
-
-    analysis.sentences_and_awards = await analyzeSection(
-      text,
-      sentencesAndAwardsPrompt,
-      SentencesAndAwardsSchema,
-    );
-
     analysis.key_persons = await analyzeSection(
       text,
       keyPersonsPrompt,
       KeyPersonSchema,
-    );
-
-    analysis.legislation = await analyzeSection(
-      text,
-      LegislationPrompt,
-      LegislationAnalysisSchema,
     );
 
     // Generate final summary
@@ -117,8 +113,16 @@ export async function POST(request: Request) {
     const finalAnalysis = mergeResults(analysis);
 
     return NextResponse.json({
-      analysis: finalAnalysis,
-      // metadataConfidence: metadataAnalysis.confidence,
+      analysis,
+      metadataConfidence: metadataAnalysis.confidence,
+      legislationConfidence: legislationAnalysis.confidence,
+      factualBackgroundConfidence: factualBackgroundAnalysis.confidence,
+      argumentsAndReasoningConfidence: argumentsAndReasoningAnalysis.confidence,
+      decisionsAndPrecedentsConfidence:
+        decisionsAndPrecedentsAnalysis.confidence,
+      implicationsAndContextConfidence:
+        implicationsAndContextAnalysis.confidence,
+      sentencesAndAwardsConfidence: sentencesAndAwardsAnalysis.confidence,
     });
   } catch (error) {
     console.error("Error analyzing case:", error);

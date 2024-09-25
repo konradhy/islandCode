@@ -18,7 +18,6 @@ export async function analyzeArgumentsAndReasoning(text: string): Promise<{
     argumentsAndReasoningPrompts.initialExtraction,
     ArgumentsAndReasoningSchema,
   );
-  console.log("Initial arguments and reasoning:", initialArgumentsAndReasoning);
 
   // Verification and refinement
   const refinedArgumentsAndReasoning = await analyzeSection(
@@ -26,7 +25,6 @@ export async function analyzeArgumentsAndReasoning(text: string): Promise<{
     argumentsAndReasoningPrompts.verificationAndRefinement,
     ArgumentsAndReasoningSchema,
   );
-  console.log("Refined arguments and reasoning:", refinedArgumentsAndReasoning);
 
   // Confidence assessment
   const confidenceAssessment = await analyzeSection(
@@ -34,8 +32,6 @@ export async function analyzeArgumentsAndReasoning(text: string): Promise<{
     argumentsAndReasoningPrompts.confidenceAssessment,
     ArgumentsAndReasoningConfidenceSchema,
   );
-
-  console.log("Confidence assessment:", confidenceAssessment);
 
   const hasLowConfidence = Object.values(confidenceAssessment).some((field) => {
     if (typeof field === "object" && field !== null) {

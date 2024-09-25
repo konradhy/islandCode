@@ -11,22 +11,27 @@ You are an expert legal analyst tasked with extracting the decision, ratio decid
 Please structure your response according to the following JSON format:
 
 {
-  "decision": "string summarizing the court's decision",
-  "ratio_decidendi": "string explaining the principle or rule of law",
+  "decision": "Start with a string that summarizes the courts's decision. Outline the court's ruling on each issue, any specific orders or remedies issued by the court, whether the decision was unanimous or if there were dissenting opinions. ,
+  "ratio_decidendi": "string explaining the core principle of law that is being reaffirmed or established by the court's decision. This should be a clear and concise statement of said principle of law",
   "key_precedents": [
     {
       "case_name": "string",
-      "relevance": "string explaining how this precedent relates to the current case"
+      "relevance": "string explaining how this precedent relates to the current case and how the court applied or distinguished it",
+      "quote": "If there is a quote that helps illustrate the principle of law that the precedent establishes, please include it here. If there is no quote, please include a summary of the principle of law that the precedent establishes.",
+      "principle": "The principle of law that the precedent establishes.",
+      "context": "A brief explanation (1-2 sentences) of the factual or legal context surrounding the quote or principle in the precedent case, highlighting why it's relevant to the current case and how it's applied or distinguished"
     },
     ...
   ]
 }
 
 Ensure that:
-- The decision is a clear and concise statement of the court's ruling.
+- The decision is a clear.
 - The ratio decidendi captures the essential legal principle that formed the basis of the decision.
 - Each key precedent includes both the name of the case and a brief explanation of its relevance to the current case.
 - You capture all major precedents cited, but focus on those most central to the court's reasoning.
+- The quote is a direct quote from the precedent, and the principle is a clear and concise statement of the principle of law that the precedent establishes.
+
 
 Now, please analyze the following case text and extract the decision, ratio decidendi, and key precedents as described above:
 
@@ -44,6 +49,7 @@ Compare this extraction with the original case text provided below. Your tasks a
 3. Ensure that the ratio decidendi accurately reflects the principle of law that was central to the court's decision.
 4. Add any important precedents that may have been missed in the initial extraction.
 5. Confirm that the relevance of each precedent is clearly explained in relation to the current case.
+6. The principle should be clearly stated, someone should be able to understand the principle of law that the precedent establishes.
 
 Provide your refined decision, ratio decidendi, and key precedents in the same JSON format as the input.
 
