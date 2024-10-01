@@ -120,7 +120,7 @@ const CaseDetails = () => {
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">Date of Delivery</p>
-                <p>{caseDetails.dateOfDelivery.toLocaleDateString()}</p>
+                <p>{caseDetails.dateOfDelivery.toLocaleString("en-GB", { timeZone: "UTC" })}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">Presiding Judge</p>
