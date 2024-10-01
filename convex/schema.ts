@@ -30,5 +30,11 @@ export default defineSchema({
     errorMessage: v.string(),
     retryCount: v.number(),
     lastAttempt: v.number(), // Unix timestamp
-  }).index("by_year", ["year"])
+  }).index("by_year", ["year"]),
+
+
+  test: defineTable({
+    caseTitle: v.string(),
+   
+  }), 
 });

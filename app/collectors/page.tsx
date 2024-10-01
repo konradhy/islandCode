@@ -1,3 +1,12 @@
+"use client"
+export default function DataCollectionPage() {
+    return (
+        <div>
+            <h1>Data Collection Page</h1>
+        </div>
+    )
+}
+
 // 'use client'
 // import React, { useState } from 'react';
 // import { Button } from "@/components/ui/button"

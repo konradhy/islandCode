@@ -4,7 +4,7 @@ import { ImplicationsAndContextSchema } from "@/types/caseAnalysis";
 import { z } from "zod";
 import { implicationsAndContextPrompts } from "@/lib/prompts/implicationsAndContextPrompts";
 import { ImplicationsAndContextConfidenceSchema } from "@/types/caseAnalysisConfidence";
-import { analyzeSection } from "@/app/api/analyse-case/route";
+import { analyzeSection } from "@/lib/serverUtils";
 
 export async function analyzeImplicationsAndContext(text: string): Promise<{
   implicationsAndContext: z.infer<typeof ImplicationsAndContextSchema>;

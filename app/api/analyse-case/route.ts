@@ -2,19 +2,15 @@
 
 import { NextResponse } from "next/server";
 
-import { zodResponseFormat } from "openai/helpers/zod";
+
 import {
-  ArgumentsAndReasoningSchema,
-  DecisionAndPrecedentsSchema,
-  ImplicationsAndContextSchema,
-  SentencesAndAwardsSchema,
+
   CaseAnalysis,
   FinalSummarySchema,
   KeyPersonSchema,
-  LegislationAnalysisSchema,
+
 } from "@/types/caseAnalysis";
-import { z } from "zod";
-import { mergeResults } from "@/lib/mergeResults";
+
 import {
   decisionAndPrecedentsPrompt,
   implicationsAndContextPrompt,
@@ -32,24 +28,9 @@ import { analyzeDecisionsAndPrecedents } from "@/lib/caseAnalysis/decisionsAndPr
 import { analyzeImplicationsAndContext } from "@/lib/caseAnalysis/implicationsAndContextAnalysis";
 import { analyzeSentencesAndAwards } from "@/lib/caseAnalysis/sentencesAndAwardsAnalysis";
 import { analyzeLegislation } from "@/lib/caseAnalysis/legislationAnalysis";
+import { analyzeSection } from "@/lib/serverUtils";
 
-export async function analyzeSection<T extends z.ZodType>(
-  text: string,
-  prompt: string,
-  schema: T,
-): Promise<z.infer<T>> {
-  const completion = await openai.beta.chat.completions.parse({
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: prompt },
-      { role: "user", content: text },
-    ],
-    temperature: 0.7,
-    response_format: zodResponseFormat(schema, "section_analysis"),
-  });
 
-  return completion.choices[0].message.parsed;
-}
 
 //So for Now. If the confidence is low for anything
 export async function POST(request: Request) {
@@ -109,8 +90,6 @@ export async function POST(request: Request) {
 
     analysis.final_summary = finalSummaryResult.summary;
 
-    // TODO: is merge result still need?
-    const finalAnalysis = mergeResults(analysis);
 
     return NextResponse.json({
       analysis,

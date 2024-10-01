@@ -4,7 +4,7 @@ import { ArgumentsAndReasoningSchema } from "@/types/caseAnalysis";
 import { z } from "zod";
 import { argumentsAndReasoningPrompts } from "@/lib/prompts/argumentsAndReasoningPrompts";
 import { ArgumentsAndReasoningConfidenceSchema } from "@/types/caseAnalysisConfidence";
-import { analyzeSection } from "@/app/api/analyse-case/route";
+import { analyzeSection } from "@/lib/serverUtils";
 
 //Should I have wet code for the other sections? Or should I make it dry?
 export async function analyzeArgumentsAndReasoning(text: string): Promise<{

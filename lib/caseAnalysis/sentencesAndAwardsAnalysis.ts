@@ -4,7 +4,7 @@ import { SentencesAndAwardsSchema } from "@/types/caseAnalysis";
 import { z } from "zod";
 import { sentencesAndAwardsPrompts } from "@/lib/prompts/sentencesAndAwardsPrompts";
 import { SentencesAndAwardsConfidenceSchema } from "@/types/caseAnalysisConfidence";
-import { analyzeSection } from "@/app/api/analyse-case/route";
+import { analyzeSection } from "@/lib/serverUtils";
 
 export async function analyzeSentencesAndAwards(text: string): Promise<{
   sentencesAndAwards: z.infer<typeof SentencesAndAwardsSchema>;

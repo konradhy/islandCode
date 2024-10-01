@@ -4,7 +4,7 @@ import { LegislationAnalysisSchema } from "@/types/caseAnalysis";
 import { z } from "zod";
 import { legislationPrompts } from "@/lib/prompts/legislationPrompts";
 import { LegislationAnalysisConfidenceSchema } from "@/types/caseAnalysisConfidence";
-import { analyzeSection } from "@/app/api/analyse-case/route";
+import { analyzeSection } from "@/lib/serverUtils";
 
 export async function analyzeLegislation(text: string): Promise<{
   legislationAnalysis: z.infer<typeof LegislationAnalysisSchema>;

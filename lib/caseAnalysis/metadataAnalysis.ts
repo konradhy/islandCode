@@ -4,7 +4,7 @@ import { MetadataSchema } from "@/types/caseAnalysis";
 import { z } from "zod";
 import { metadataPrompts } from "@/lib/prompts/metadataPrompts";
 import { MetadataConfidenceSchema } from "@/types/caseAnalysisConfidence";
-import { analyzeSection } from "@/app/api/analyse-case/route";
+import { analyzeSection } from "@/lib/serverUtils";
 
 //Should I have wet code for the other sections? Or should I make it dry?
 export async function analyzeMetadata(text: string): Promise<{

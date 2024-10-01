@@ -4,7 +4,7 @@ import { DecisionAndPrecedentsSchema } from "@/types/caseAnalysis";
 import { z } from "zod";
 import { decisionsAndPrecedentsPrompts } from "@/lib/prompts/decisionsAndPrecedentsPrompts";
 import { DecisionAndPrecedentsConfidenceSchema } from "@/types/caseAnalysisConfidence";
-import { analyzeSection } from "@/app/api/analyse-case/route";
+import { analyzeSection } from "@/lib/serverUtils";
 
 export async function analyzeDecisionsAndPrecedents(text: string): Promise<{
   decisionsAndPrecedents: z.infer<typeof DecisionAndPrecedentsSchema>;

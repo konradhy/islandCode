@@ -14,7 +14,6 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as cases from "../cases.js";
-import type * as failedCases from "../failedCases.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -26,7 +25,6 @@ import type * as failedCases from "../failedCases.js";
  */
 declare const fullApi: ApiFromModules<{
   cases: typeof cases;
-  failedCases: typeof failedCases;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

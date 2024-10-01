@@ -4,7 +4,7 @@ import { FactualBackgroundSchema } from "@/types/caseAnalysis";
 import { z } from "zod";
 import { factualBackgroundPrompts } from "@/lib/prompts/factualBackgroundPrompts";
 import { FactualBackgroundConfidenceSchema } from "@/types/caseAnalysisConfidence";
-import { analyzeSection } from "@/app/api/analyse-case/route";
+import { analyzeSection } from "@/lib/serverUtils";
 
 export async function analyzeFactualBackground(text: string): Promise<{
   factualBackground: z.infer<typeof FactualBackgroundSchema>;
