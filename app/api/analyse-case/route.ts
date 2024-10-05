@@ -37,17 +37,24 @@ export async function POST(request: Request) {
   try {
     const { text } = await request.json();
 
-    // Analyze metadata using the new multi-pass approach
-    const metadataAnalysis = await analyzeMetadata(text);
-    const factualBackgroundAnalysis = await analyzeFactualBackground(text);
-    const argumentsAndReasoningAnalysis =
-      await analyzeArgumentsAndReasoning(text);
-    const decisionsAndPrecedentsAnalysis =
-      await analyzeDecisionsAndPrecedents(text);
-    const implicationsAndContextAnalysis =
-      await analyzeImplicationsAndContext(text);
-    const sentencesAndAwardsAnalysis = await analyzeSentencesAndAwards(text);
-    const legislationAnalysis = await analyzeLegislation(text);
+    // Run all analyses concurrently
+    const [
+      metadataAnalysis,
+      factualBackgroundAnalysis,
+      argumentsAndReasoningAnalysis,
+      decisionsAndPrecedentsAnalysis,
+      implicationsAndContextAnalysis,
+      sentencesAndAwardsAnalysis,
+      legislationAnalysis
+    ] = await Promise.all([
+      analyzeMetadata(text, true),
+      analyzeFactualBackground(text),
+      analyzeArgumentsAndReasoning(text),
+      analyzeDecisionsAndPrecedents(text, true),
+      analyzeImplicationsAndContext(text),
+      analyzeSentencesAndAwards(text),
+      analyzeLegislation(text)
+    ]);
 
     const analysis: Partial<CaseAnalysis> = {
       metadata: metadataAnalysis.metadata,

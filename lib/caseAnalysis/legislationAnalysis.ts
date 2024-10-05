@@ -17,7 +17,7 @@ export async function analyzeLegislation(text: string): Promise<{
     legislationPrompts.initialExtraction,
     LegislationAnalysisSchema,
   );
-  console.log("Initial legislation analysis:", initialLegislationAnalysis);
+
 
   // Verification and refinement
   const refinedLegislationAnalysis = await analyzeSection(
@@ -25,7 +25,7 @@ export async function analyzeLegislation(text: string): Promise<{
     legislationPrompts.verificationAndRefinement,
     LegislationAnalysisSchema,
   );
-  console.log("Refined legislation analysis:", refinedLegislationAnalysis);
+
 
   // Confidence assessment
   const confidenceAssessment = await analyzeSection(
@@ -34,7 +34,7 @@ export async function analyzeLegislation(text: string): Promise<{
     LegislationAnalysisConfidenceSchema,
   );
 
-  console.log("Confidence assessment:", confidenceAssessment);
+
 
   const hasLowConfidence =
     confidenceAssessment.overall.confidence === "Low" ||

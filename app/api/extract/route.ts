@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
        const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     const pdfData = await pdfParse(buffer);
-    console.log(pdfData.text)
+
     return NextResponse.json({ text: pdfData.text });
   } catch (error) {
     console.error('Error parsing PDF:', error);

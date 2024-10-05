@@ -7,11 +7,33 @@ import { MetadataConfidenceSchema } from "@/types/caseAnalysisConfidence";
 import { analyzeSection } from "@/lib/serverUtils";
 
 //Should I have wet code for the other sections? Or should I make it dry?
-export async function analyzeMetadata(text: string): Promise<{
+export async function analyzeMetadata(
+  text: string,
+  quickAnalysis: boolean = false
+): Promise<{
   metadata: z.infer<typeof MetadataSchema>;
-  confidence: z.infer<typeof MetadataConfidenceSchema>;
+  confidence: z.infer<typeof MetadataConfidenceSchema> | null;
   hasLowConfidence: boolean;
 }> {
+  if (quickAnalysis) {
+    // Quick analysis: only make one call for initial extraction
+    const initialMetadata = await analyzeSection(
+      text,
+      metadataPrompts.initialExtraction,
+      MetadataSchema,
+    );
+
+    // Generate a generic low confidence assessment
+  console.log("We ran metadata quick analysis")
+
+    return {
+      metadata: initialMetadata,
+      confidence: null,
+      hasLowConfidence: true,
+    };
+  }
+
+  // Full analysis: proceed with the original implementation
   // Initial extraction
   const initialMetadata = await analyzeSection(
     text,
@@ -45,6 +67,7 @@ export async function analyzeMetadata(text: string): Promise<{
     }
     return false;
   });
+  console.log("We ran metadata full analysis")
 
   return {
     metadata: refinedMetadata,
@@ -52,3 +75,5 @@ export async function analyzeMetadata(text: string): Promise<{
     hasLowConfidence,
   };
 }
+
+

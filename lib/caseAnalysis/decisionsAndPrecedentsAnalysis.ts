@@ -6,14 +6,29 @@ import { decisionsAndPrecedentsPrompts } from "@/lib/prompts/decisionsAndPrecede
 import { DecisionAndPrecedentsConfidenceSchema } from "@/types/caseAnalysisConfidence";
 import { analyzeSection } from "@/lib/serverUtils";
 
-export async function analyzeDecisionsAndPrecedents(text: string): Promise<{
+export async function analyzeDecisionsAndPrecedents(text: string, quickAnalysis: boolean = false): Promise<{
   decisionsAndPrecedents: z.infer<typeof DecisionAndPrecedentsSchema>;
-  confidence: z.infer<typeof DecisionAndPrecedentsConfidenceSchema>;
+  confidence: z.infer<typeof DecisionAndPrecedentsConfidenceSchema> | null;
   hasLowConfidence: boolean;
 }> {
-  // Initial extraction
-  const initialDecisionsAndPrecedents = await analyzeSection(
-    text,
+  if (quickAnalysis) {
+    // Quick analysis: only make one call for initial extraction
+    const initialDecisionsAndPrecedents = await analyzeSection(
+      text,
+    decisionsAndPrecedentsPrompts.initialExtraction,
+    DecisionAndPrecedentsSchema,
+  );
+
+  console.log("We ran decisions and precedents quick analysis")
+
+  return {
+    decisionsAndPrecedents: initialDecisionsAndPrecedents,
+    confidence: null,
+    hasLowConfidence: true,
+  };
+  }
+ const initialDecisionsAndPrecedents = await analyzeSection(
+      text,
     decisionsAndPrecedentsPrompts.initialExtraction,
     DecisionAndPrecedentsSchema,
   );

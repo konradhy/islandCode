@@ -17,7 +17,7 @@ export async function analyzeSentencesAndAwards(text: string): Promise<{
     sentencesAndAwardsPrompts.initialExtraction,
     SentencesAndAwardsSchema,
   );
-  console.log("Initial sentences and awards:", initialSentencesAndAwards);
+
 
   // Verification and refinement
   const refinedSentencesAndAwards = await analyzeSection(
@@ -25,7 +25,7 @@ export async function analyzeSentencesAndAwards(text: string): Promise<{
     sentencesAndAwardsPrompts.verificationAndRefinement,
     SentencesAndAwardsSchema,
   );
-  console.log("Refined sentences and awards:", refinedSentencesAndAwards);
+
 
   // Confidence assessment
   const confidenceAssessment = await analyzeSection(
@@ -34,7 +34,7 @@ export async function analyzeSentencesAndAwards(text: string): Promise<{
     SentencesAndAwardsConfidenceSchema,
   );
 
-  console.log("Confidence assessment:", confidenceAssessment);
+
 
   const hasLowConfidence = Object.values(confidenceAssessment).some((field) => {
     if (typeof field === "object" && field !== null) {
